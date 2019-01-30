@@ -6,7 +6,7 @@ import java.util.Properties;
 
 public class ConfigVO {
 	String clientId;
-	String vaultURL;
+	String vaultUrl;
 	String keyName;
 	String clientKey;
 
@@ -18,12 +18,12 @@ public class ConfigVO {
 		this.clientId = clientId;
 	}
 
-	public String getVaultURL() {
-		return vaultURL;
+	public String getVaultUrl() {
+		return vaultUrl;
 	}
 
-	public void setVaultURL(String vaultURL) {
-		this.vaultURL = vaultURL;
+	public void setVaultUrl(String vaultUrl) {
+		this.vaultUrl = vaultUrl;
 	}
 
 	public String getKeyName() {
@@ -44,7 +44,7 @@ public class ConfigVO {
 
 	@Override
 	public String toString() {
-		return "clientId=" + clientId + " clientId=" + vaultURL + " keyName=" + keyName + " clientKey=" + clientKey;
+		return "clientId=" + clientId + " vaultUrl=" + vaultUrl + " keyName=" + keyName + " clientKey=" + clientKey;
 	}
 
 	public static ConfigVO createFromProperties() {
@@ -60,10 +60,13 @@ public class ConfigVO {
 
 		if (properties.getProperty("clientId") != null)
 			result.setClientId(properties.getProperty("clientId"));
-		if (properties.getProperty("clientId") != null)
-			result.setVaultURL(properties.getProperty("vaultURL"));
+		
+		if (properties.getProperty("vaultUrl") != null)
+			result.setVaultUrl(properties.getProperty("vaultUrl"));
+		
 		if (properties.getProperty("keyName") != null)
 			result.setKeyName(properties.getProperty("keyName"));
+		
 		if (properties.getProperty("clientKey") != null)
 			result.setClientKey(properties.getProperty("clientKey"));
 

@@ -15,7 +15,6 @@ public class App {
 	private static final Logger LOGGER = LogManager.getLogger(App.class.getName());
 
 	public static void main(String[] args) {
-
 		ConfigVO vo = ConfigVO.createFromProperties();
 		LOGGER.info(vo.toString());
 
@@ -24,7 +23,7 @@ public class App {
 		KeyVaultClient client = new KeyVaultClient(
 				new ClientSecretKeyVaultCredential(vo.getClientId(), vo.getClientKey()));
 
-		SecretBundle secret = client.getSecret(vo.getVaultURL(), "testSecret");
+		SecretBundle secret = client.getSecret(vo.getVaultUrl(), "testSecret");
 		LOGGER.info(secret.value());
 
 	}
