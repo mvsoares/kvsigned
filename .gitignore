@@ -30,3 +30,7 @@ java/.classpath
 java/.project
 java/.settings/
 /.project
+/.settings
+/target
+/.classpath
+/.project
