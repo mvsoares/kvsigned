@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.microsoft.kv</groupId>
+	<artifactId>kv-sample</artifactId>
+	<version>1.0-SNAPSHOT</version>
+
+	<name>kv-sample</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<project.java.version>1.8</project.java.version>
+
+		<maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+		<maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
+
+
+		<!-- dependencias -->
+		<project.dependecy.bcprov-jdk15on>1.60</project.dependecy.bcprov-jdk15on>
+		<project.dependecy.log4j2>2.11.1</project.dependecy.log4j2>
+		<project.dependecy.slf4j>1.8.0-beta2</project.dependecy.slf4j>
+		<project.dependecy.junit>4.12</project.dependecy.junit>
+
+		<project.dependecy.azure>1.19.0</project.dependecy.azure>
+		<project.dependecy.azure-kv>1.2.0</project.dependecy.azure-kv>
+		<project.dependecy.azure-client-runtime>[1.1.0,2.0.0)</project.dependecy.azure-client-runtime>
+
+	</properties>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${project.dependecy.junit}</version>
+			<scope>test</scope>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>${project.dependecy.bcprov-jdk15on}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>${project.dependecy.bcprov-jdk15on}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure</artifactId>
+			<version>${project.dependecy.azure}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-mgmt-resources</artifactId>
+			<version>${project.dependecy.azure}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-mgmt-keyvault</artifactId>
+			<version>${project.dependecy.azure}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-keyvault-webkey</artifactId>
+			<version>${project.dependecy.azure-kv}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-keyvault</artifactId>
+			<version>${project.dependecy.azure-kv}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-client-runtime</artifactId>
+			<version>${project.dependecy.azure-client-runtime}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-client-authentication</artifactId>
+			<version>${project.dependecy.azure-client-runtime}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${project.dependecy.log4j2}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${project.dependecy.log4j2}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${project.dependecy.slf4j}</version>
+		</dependency>
+	</dependencies>
+
+
+
+
+	<build>
+		<defaultGoal>install</defaultGoal>
+		<plugins>
+			<plugin>
+				<inherited>true</inherited>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<source>${project.build.jdk.version}</source>
+					<target>${project.build.jdk.version}</target>
+					<optimize>true</optimize>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>${maven-deploy-plugin.version}</version>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>${maven-eclipse-plugin.version}</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+
+
+</project>
