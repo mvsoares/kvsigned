@@ -26,27 +26,38 @@ public class KvDocumentUtil {
 	KeyVaultClient kvClient;
 	ConfigVO vo;
 
+	/**
+	 * Initilize KeyVault client
+	 */
 	public KvDocumentUtil() {
 		vo = ConfigVO.createFromProperties();
 		if (vo == null) {
-			LOG.fatal("Erro ao ler application.properties");
+			LOG.fatal("Error reading application.properties");
 			return;
 		} else {
 			LOG.debug(vo.toString());
 		}
 
-		LOG.info("Iniciando conexão com o kv");
+		LOG.info("Trying to connect to key vault");
 		kvClient = new KeyVaultClient(new ClientSecretKeyVaultCredential(vo.getClientId(), vo.getClientKey()));
 		if (kvClient == null) {
-			LOG.fatal("Erro na conexão com o kv");
+			LOG.fatal("Error connecting to kault");
+		} else {
+			LOG.info("Connected to key vault");
 		}
 	}
 
+	/**
+	 * Obtain a secret from vault
+	 * 
+	 * @param secretName name of secret on vault
+	 * @return secret's value
+	 */
 	public String getSecret(String secretName) {
-		LOG.debug("Obtendo secret " + secretName);
+		LOG.debug("Getting secret " + secretName);
 		SecretBundle secret = kvClient.getSecret(vo.getVaultUrl(), secretName);
 		if (secret != null) {
-			LOG.debug("Secret OK -" + secret.toString());
+			LOG.debug("Secret OK - " + secret.toString());
 			return secret.value();
 		} else {
 			LOG.error("Secret error - " + secretName);
@@ -54,31 +65,45 @@ public class KvDocumentUtil {
 		}
 	}
 
-	public DigestSignResult signDocument(String keyName, String content)
+	/**
+	 * Sign a String with a given vault-certificate
+	 * 
+	 * @param keyName Certificate full path on vault.
+	 *                https://{VAULT_NAME}.vault.azure.net/keys/{CERT_NAME}/{XXXX}
+	 * @param content Content to be signed (as string). Internally converted to
+	 *                byte[]
+	 * @return DigestSignResult with result
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 */
+	public DigestSignResult signDocument(String keyIdentifier, String content)
 			throws InterruptedException, ExecutionException, NoSuchAlgorithmException, NoSuchProviderException {
-		LOG.debug("Assinando documento " + keyName);
+		LOG.debug("Signing document" + keyIdentifier);
 
 		MessageDigest hash = MessageDigest.getInstance(SHA_TYPE, BouncyCastleProvider.PROVIDER_NAME);
 		hash.update(content.getBytes());
 		byte[] digest = hash.digest();
 
-		LOG.debug("Chamando kv.signAsync. Digest=" + digest);
-		ServiceFuture<KeyOperationResult> signResult = kvClient.signAsync(keyName, ALGORITHM, digest, null);
+		LOG.debug("Calling kv.signAsync. Digest=" + digest.toString());
+		ServiceFuture<KeyOperationResult> signResult = kvClient.signAsync(keyIdentifier, ALGORITHM, digest, null);
 		return new DigestSignResult(digest, signResult);
 	}
 
 	/**
 	 * 
-	 * @param keyIdentifier
-	 * @param signedResult
-	 * @param digestInfo
-	 * @return
+	 * @param keyIdentifier Certificate full path on vault.
+	 *                      https://{VAULT_NAME}.vault.azure.net/keys/{CERT_NAME}/{XXXX}
+	 * @param signedResult  previously signedResult
+	 * @param digestInfo    digestInfo for you date
+	 * @return true in case of sucess
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
 	public boolean verifyDocument(String keyIdentifier, byte[] signedResult, byte[] digestInfo)
 			throws InterruptedException, ExecutionException {
-
+		LOG.debug("Calling kv.verifyAsync.");
 		ServiceFuture<KeyVerifyResult> b = kvClient.verifyAsync(keyIdentifier, ALGORITHM, digestInfo, signedResult,
 				null);
 		return b.get().value();

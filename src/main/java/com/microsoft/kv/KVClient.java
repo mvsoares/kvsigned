@@ -11,10 +11,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.microsoft.kv.impl.KvDocumentUtil;
 
-/**
- * Hello world!
- *
- */
 public class KVClient {
 
 	private static final Logger LOG = LogManager.getLogger(KVClient.class.getName());
@@ -28,7 +24,7 @@ public class KVClient {
 
 		String keyIdentifier = "https://kvshimoo.vault.azure.net/keys/cert01/cc68db3ef12d424385220fb3895077b5";
 
-		LOG.info("Iniciando KV tests");
+		LOG.info("Inint KV tests");
 		KvDocumentUtil kv = new KvDocumentUtil();
 
 		String xml = "<note><to>Someone</to><from>Myself</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>";
@@ -45,6 +41,6 @@ public class KVClient {
 		value = kv.getSecret("testSecret2");
 		LOG.info("testSecret=" + value);
 
-		LOG.info("Fim dos testes ");
+		LOG.info("End of tests");
 	}
 }
