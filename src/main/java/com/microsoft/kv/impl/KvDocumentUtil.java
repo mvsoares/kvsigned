@@ -3,7 +3,6 @@ package com.microsoft.kv.impl;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,14 +11,19 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.models.KeyOperationResult;
+import com.microsoft.azure.keyvault.models.KeyVerifyResult;
 import com.microsoft.azure.keyvault.models.SecretBundle;
 import com.microsoft.azure.keyvault.webkey.JsonWebKeySignatureAlgorithm;
 import com.microsoft.kv.ConfigVO;
+import com.microsoft.kv.DigestSignResult;
+import com.microsoft.rest.ServiceFuture;
 
 public class KvDocumentUtil {
+	private static final String SHA_TYPE = "SHA-256";
 	private static final Logger LOG = LogManager.getLogger(KvDocumentUtil.class.getName());
+	private static final JsonWebKeySignatureAlgorithm ALGORITHM = JsonWebKeySignatureAlgorithm.RS256;
 
-	KeyVaultClient client;
+	KeyVaultClient kvClient;
 	ConfigVO vo;
 
 	public KvDocumentUtil() {
@@ -32,15 +36,15 @@ public class KvDocumentUtil {
 		}
 
 		LOG.info("Iniciando conexão com o kv");
-		client = new KeyVaultClient(new ClientSecretKeyVaultCredential(vo.getClientId(), vo.getClientKey()));
-		if (client == null) {
+		kvClient = new KeyVaultClient(new ClientSecretKeyVaultCredential(vo.getClientId(), vo.getClientKey()));
+		if (kvClient == null) {
 			LOG.fatal("Erro na conexão com o kv");
 		}
 	}
 
 	public String getSecret(String secretName) {
 		LOG.debug("Obtendo secret " + secretName);
-		SecretBundle secret = client.getSecret(vo.getVaultUrl(), secretName);
+		SecretBundle secret = kvClient.getSecret(vo.getVaultUrl(), secretName);
 		if (secret != null) {
 			LOG.debug("Secret OK -" + secret.toString());
 			return secret.value();
@@ -50,27 +54,33 @@ public class KvDocumentUtil {
 		}
 	}
 
-	public void signDocument(String content, String keyName)
+	public DigestSignResult signDocument(String keyName, String content)
 			throws InterruptedException, ExecutionException, NoSuchAlgorithmException, NoSuchProviderException {
 		LOG.debug("Assinando documento " + keyName);
 
-		String shaType = "SHA-256";
-		MessageDigest hash = MessageDigest.getInstance(shaType, BouncyCastleProvider.PROVIDER_NAME);
+		MessageDigest hash = MessageDigest.getInstance(SHA_TYPE, BouncyCastleProvider.PROVIDER_NAME);
 		hash.update(content.getBytes());
 		byte[] digest = hash.digest();
 
-		KeyOperationResult signResult = client.signAsync(keyName, JsonWebKeySignatureAlgorithm.RS256, digest, null)
-				.get();
-
-//				client.signAsync(vo.getVaultUrl(), keyName, keyVersion, JsonWebKeySignatureAlgorithm.RS256, digest,
-//						null).get();
-
-		LOG.info(signResult.toString());
-//		
-//		  var sresult = await keyClient.SignAsync(keyvaultUri, keyIdentifier, keyVersion,
-//	                Microsoft.Azure.KeyVault.WebKey.JsonWebKeySignatureAlgorithm.RS256, digest);
-//	return sresult.Result; 
-//		nQBfmCaEYQ85kDje_jELyszUa54s3ILkfvC3-rimzTU60yFwwgujbIGNQx9wIL6dfKvBDqOHlgTZ5Y9IGBQ9BCGs6T4i5qH_bpaI0z9wtcdGq3WrHkieYJH9XUNYjLBYhRfVQfRXtJZ79GRWRewMJg149SuJAt9evg-DuXsnHoDCg5cP6T483KsgkA-_o0TCHJ2eBjo1ct5gLMX0KsMhKLrTE649bmhVxVi5ECJZYiPUaEUUPXTIh8ZQcy3fPY2FZf2wMCVixUFK_IEhP2xFD4TL_SzcGZkORvBHrX9XF1R59MVPoQXN2Uz9BNVKYafHYnUf6wyNUz8Q2sYCqAC_pg
+		LOG.debug("Chamando kv.signAsync. Digest=" + digest);
+		ServiceFuture<KeyOperationResult> signResult = kvClient.signAsync(keyName, ALGORITHM, digest, null);
+		return new DigestSignResult(digest, signResult);
 	}
 
+	/**
+	 * 
+	 * @param keyIdentifier
+	 * @param signedResult
+	 * @param digestInfo
+	 * @return
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	public boolean verifyDocument(String keyIdentifier, byte[] signedResult, byte[] digestInfo)
+			throws InterruptedException, ExecutionException {
+
+		ServiceFuture<KeyVerifyResult> b = kvClient.verifyAsync(keyIdentifier, ALGORITHM, digestInfo, signedResult,
+				null);
+		return b.get().value();
+	}
 }
