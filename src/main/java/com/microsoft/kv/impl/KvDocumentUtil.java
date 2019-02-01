@@ -82,13 +82,26 @@ public class KvDocumentUtil {
 			throws InterruptedException, ExecutionException, NoSuchAlgorithmException, NoSuchProviderException {
 		LOG.debug("Signing document" + keyIdentifier);
 
-		MessageDigest hash = MessageDigest.getInstance(SHA_TYPE, BouncyCastleProvider.PROVIDER_NAME);
-		hash.update(content.getBytes());
-		byte[] digest = hash.digest();
+		byte[] digest = generateHashFromString(content);
 
 		LOG.debug("Calling kv.signAsync. Digest=" + digest.toString());
 		ServiceFuture<KeyOperationResult> signResult = kvClient.signAsync(keyIdentifier, ALGORITHM, digest, null);
 		return new DigestSignResult(digest, signResult);
+	}
+
+	
+	/**
+	 * Generate a hash for a given String
+	 * @param content String to get Hash
+	 * @return byte[] with generated hash
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 */
+	public static byte[] generateHashFromString(String content) throws NoSuchAlgorithmException, NoSuchProviderException {
+		MessageDigest hash = MessageDigest.getInstance(SHA_TYPE, BouncyCastleProvider.PROVIDER_NAME);
+		hash.update(content.getBytes());
+		byte[] digest = hash.digest();
+		return digest;
 	}
 
 	/**

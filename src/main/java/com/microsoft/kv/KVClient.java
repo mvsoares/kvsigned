@@ -34,6 +34,11 @@ public class KVClient {
 		boolean check = kv.verifyDocument(keyIdentifier, signResult.getResultSign().get().result(),
 				signResult.digestInfo);
 		LOG.info("verifyDocument=" + check);
+		
+		check = kv.verifyDocument(keyIdentifier, signResult.getResultSign().get().result(),
+				KvDocumentUtil.generateHashFromString("teste"));
+		LOG.info("verifyDocument=" + check);
+		
 
 		String value = kv.getSecret("testSecret");
 		LOG.info("testSecret=" + value);
