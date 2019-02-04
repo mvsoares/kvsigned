@@ -7,7 +7,6 @@ import java.util.Properties;
 public class ConfigVO {
 	String clientId;
 	String vaultUrl;
-	String keyName;
 	String clientKey;
 
 	public String getClientId() {
@@ -26,14 +25,6 @@ public class ConfigVO {
 		this.vaultUrl = vaultUrl;
 	}
 
-	public String getKeyName() {
-		return keyName;
-	}
-
-	public void setKeyName(String keyName) {
-		this.keyName = keyName;
-	}
-
 	public String getClientKey() {
 		return clientKey;
 	}
@@ -44,7 +35,7 @@ public class ConfigVO {
 
 	@Override
 	public String toString() {
-		return "clientId=" + clientId + " vaultUrl=" + vaultUrl + " keyName=" + keyName + " clientKey=" + clientKey;
+		return "clientId=" + clientId + " vaultUrl=" + vaultUrl + " clientKey=" + clientKey;
 	}
 
 	public static ConfigVO createFromProperties() {
@@ -60,13 +51,10 @@ public class ConfigVO {
 
 		if (properties.getProperty("clientId") != null)
 			result.setClientId(properties.getProperty("clientId"));
-		
+
 		if (properties.getProperty("vaultUrl") != null)
 			result.setVaultUrl(properties.getProperty("vaultUrl"));
-		
-		if (properties.getProperty("keyName") != null)
-			result.setKeyName(properties.getProperty("keyName"));
-		
+
 		if (properties.getProperty("clientKey") != null)
 			result.setClientKey(properties.getProperty("clientKey"));
 

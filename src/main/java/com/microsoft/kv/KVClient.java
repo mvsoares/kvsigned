@@ -1,5 +1,7 @@
 package com.microsoft.kv;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
@@ -19,8 +21,8 @@ public class KVClient {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-	public static void main(String[] args)
-			throws NoSuchAlgorithmException, NoSuchProviderException, InterruptedException, ExecutionException {
+	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException,
+			InterruptedException, ExecutionException, IOException {
 
 		String keyIdentifier = "https://kvshimoo.vault.azure.net/keys/cert01/cc68db3ef12d424385220fb3895077b5";
 
@@ -34,11 +36,23 @@ public class KVClient {
 		boolean check = kv.verifyDocument(keyIdentifier, signResult.getResultSign().get().result(),
 				signResult.digestInfo);
 		LOG.info("verifyDocument=" + check);
-		
+
 		check = kv.verifyDocument(keyIdentifier, signResult.getResultSign().get().result(),
 				KvDocumentUtil.generateHashFromString("teste"));
 		LOG.info("verifyDocument=" + check);
-		
+
+		String fileName = System.getProperty("user.dir") + "/sample.xml";
+		File xmlFile = new File(fileName);
+		DigestSignResult xmlSignResult = kv.signDocument(keyIdentifier, xmlFile);
+		LOG.info(xmlSignResult.toString());
+
+		boolean xmlCheck = kv.verifyDocument(keyIdentifier, xmlSignResult.getResultSign().get().result(),
+				signResult.digestInfo);
+		LOG.info("verifyDocument=" + xmlCheck);
+
+		check = kv.verifyDocument(keyIdentifier, xmlSignResult.getResultSign().get().result(),
+				KvDocumentUtil.generateHashFromString("teste"));
+		LOG.info("verifyDocument=" + check);
 
 		String value = kv.getSecret("testSecret");
 		LOG.info("testSecret=" + value);
@@ -47,5 +61,6 @@ public class KVClient {
 		LOG.info("testSecret=" + value);
 
 		LOG.info("End of tests");
+		System.exit(0);
 	}
 }

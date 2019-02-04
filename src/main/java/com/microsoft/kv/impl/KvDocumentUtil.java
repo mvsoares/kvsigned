@@ -1,5 +1,8 @@
 package com.microsoft.kv.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -45,6 +48,7 @@ public class KvDocumentUtil {
 		} else {
 			LOG.info("Connected to key vault");
 		}
+
 	}
 
 	/**
@@ -80,26 +84,75 @@ public class KvDocumentUtil {
 	 */
 	public DigestSignResult signDocument(String keyIdentifier, String content)
 			throws InterruptedException, ExecutionException, NoSuchAlgorithmException, NoSuchProviderException {
+		return signDocument(keyIdentifier, content.getBytes());
+	}
+
+	/**
+	 * Sign a File with a given vault-certificate
+	 * 
+	 * @param keyName Certificate full path on vault.
+	 *                https://{VAULT_NAME}.vault.azure.net/keys/{CERT_NAME}/{XXXX}
+	 * @param file    File to be signed (as string). Internally converted to byte[]
+	 * @return DigestSignResult with result
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 * @throws IOException
+	 */
+	public DigestSignResult signDocument(String keyIdentifier, File file) throws InterruptedException,
+			ExecutionException, NoSuchAlgorithmException, NoSuchProviderException, IOException {
+		byte[] byteContent = Files.readAllBytes(file.toPath());
+		return signDocument(keyIdentifier, byteContent);
+	}
+
+	/**
+	 * Sign a byte[] content with a given vault-certificate
+	 * 
+	 * @param keyIdentifier
+	 * @param content
+	 * @return
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 */
+	public DigestSignResult signDocument(String keyIdentifier, byte[] content)
+			throws InterruptedException, ExecutionException, NoSuchAlgorithmException, NoSuchProviderException {
 		LOG.debug("Signing document" + keyIdentifier);
 
-		byte[] digest = generateHashFromString(content);
-
+		byte[] digest = generateHashFromBytes(content);
 		LOG.debug("Calling kv.signAsync. Digest=" + digest.toString());
 		ServiceFuture<KeyOperationResult> signResult = kvClient.signAsync(keyIdentifier, ALGORITHM, digest, null);
 		return new DigestSignResult(digest, signResult);
 	}
 
-	
 	/**
 	 * Generate a hash for a given String
+	 * 
 	 * @param content String to get Hash
 	 * @return byte[] with generated hash
 	 * @throws NoSuchAlgorithmException
 	 * @throws NoSuchProviderException
 	 */
-	public static byte[] generateHashFromString(String content) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public static byte[] generateHashFromString(String content)
+			throws NoSuchAlgorithmException, NoSuchProviderException {
+		return generateHashFromBytes(content.getBytes());
+	}
+
+	/**
+	 * Generate a hash for a given byte seq
+	 * 
+	 * @param content byteseq to get Hash
+	 * @return byte[] with generated hash
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
+	 */
+
+	public static byte[] generateHashFromBytes(byte[] content)
+			throws NoSuchAlgorithmException, NoSuchProviderException {
 		MessageDigest hash = MessageDigest.getInstance(SHA_TYPE, BouncyCastleProvider.PROVIDER_NAME);
-		hash.update(content.getBytes());
+		hash.update(content);
 		byte[] digest = hash.digest();
 		return digest;
 	}
