@@ -1,0 +1,30 @@
+az group create -n RG_KV -l eastus
+
+az keyvault create \
+  -n kvshimoo \
+  -g RG_KV \
+  --enabled-for-deployment \
+  --sku standard 
+
+az keyvault secret set \
+  -n secret01 \
+  --vault-name kvshimoo \
+  --value "this is a secret" \
+  --description "This is a KV secret sample" 
+
+az keyvault set-policy \
+  -n kvshimoo \
+  -g RG_KV \
+  --certificate-permissions backup create delete deleteissuers get getissuers import list listissuers managecontacts manageissuers purge recover restore setissuers update \
+  --key-permissions backup create decrypt delete encrypt get import list purge recover restore sign unwrapKey update verify wrapKey \
+  --secret-permissions backup delete get list purge recover restore set \
+  --object-id 27c5ec46-9ce4-4175-8855-68ef772f86b2
+
+az keyvault certificate create \
+  --vault-name kvshimoo \
+  -n cert1 \
+  -p "$(az keyvault certificate get-default-policy -o json)"
+
+
+
+# sudo openssl req -x509 -nodes -newkey rsa:2048 -keyout example.com.key -out example.com.crt
